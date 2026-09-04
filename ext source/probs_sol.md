@@ -1,4 +1,5 @@
-# bypass battery health checks and prevent your faulty power module from blocking arming, you must disable both the **Battery Pre-Arm Checks** and the **Battery Failsafes** in ArduPilot via QGroundControl.
+# BYPASSING BATTERY HEALTH 
+bypass battery health checks and prevent your faulty power module from blocking arming, you must disable both the **Battery Pre-Arm Checks** and the **Battery Failsafes** in ArduPilot via QGroundControl.
 
 > **Warning:** Disabling battery checks means ArduPilot cannot monitor your battery voltage or current in flight. The flight controller will not alert you or automatically Return-To-Launch (RTL) when the LiPo is low. Use a standalone LiPo voltage alarm / buzzer plugged directly into your battery balance lead.
 
@@ -53,6 +54,8 @@ To ensure ArduPilot doesn't require battery voltage data during system boot chec
 | **`BATT_FS_LOW_ACT`** | `0` | Disables low voltage action trigger |
 | **`BATT_FS_CRT_ACT`** | `0` | Disables critical voltage action trigger |
 | **`ARMING_CHECK`** | Uncheck *Battery* | Removes voltage/current checks from pre-arm gate |
+
+# ALTERNATIVES FOR BATTERY MONITOR
 
 Depending on whether you want **standalone hardware alerts** on the drone or **voltage telemetry back to ArduPilot**, here are the best low-cost alternatives to replace a faulty flight controller power module.
 
