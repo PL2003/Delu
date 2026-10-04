@@ -1,9 +1,6 @@
-Below is an updated USER_GUIDE.md you can copy directly into the repository. It keeps the original project architecture intact and treats the phone web server as an optional independent addition.
-
 # 🚗 Autonomous Rover — Jetson Orin Deployment & User Guide
 
-Complete deployment, configuration, testing, and operation guide for running the
-**Obstacle Avoidance Prototype** on a **Jetson Orin + 4-Wheel Rover**.
+Complete deployment, configuration, testing, and operation guide for running the **Obstacle Avoidance Prototype** on a **Jetson Orin + 4-Wheel Rover**.
 
 ---
 
@@ -12,111 +9,65 @@ Complete deployment, configuration, testing, and operation guide for running the
 The rover uses the following architecture:
 
 ```text
-                         ┌──────────────────────────┐
-                         │        PHONE             │
-                         │                          │
-                         │ Local Web Dashboard      │
-                         │ START / STOP / STATUS    │
-                         └────────────┬─────────────┘
-                                      │ Wi-Fi
-                                      ▼
+┌──────────────────────────┐
+│          PHONE           │
+│                          │
+│   Local Web Dashboard    │
+│  START / STOP / STATUS   │
+└────────────┬─────────────┘
+             │ Wi-Fi
+             ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                       JETSON ORIN                            │
+│                         JETSON ORIN                          │
 │                                                              │
-│  main_robot_controller.py                                    │
+│                  main_robot_controller.py                    │
 │                                                              │
-│  ┌────────────┐    ┌──────────────┐    ┌─────────────────┐ │
-│  │ RealSense  │───►│ ArUco        │    │ YOLO-World      │ │
-│  │ RGB+Depth  │    │ Detection    │    │ Object Detection│ │
-│  └────────────┘    └──────────────┘    └─────────────────┘ │
-│          │                  │                    │            │
-│          └──────────────────┴────────────────────┘            │
-│                             │                                 │
-│                    Obstacle / Navigation                      │
-│                       Decision Logic                           │
-│                             │                                 │
-│                             ▼                                 │
-│                       USB Serial                              │
-└─────────────────────────────┬────────────────────────────────┘
-                              │
-                         115200 baud
-                              │
-                              ▼
-                     ┌─────────────────┐
-                     │      ESP32      │
-                     │ Motor Controller│
-                     └────────┬────────┘
-                              │
-                         Motor Driver
-                              │
-                  ┌───────────┴───────────┐
-                  ▼                       ▼
-             Left Motors             Right Motors
-
-
----
+│  ┌────────────┐        ┌──────────────┐    ┌─────────────────┐ │
+│  │ RealSense  │───────►│    ArUco     │    │   YOLO-World    │ │
+│  │ RGB+Depth  │        │  Detection   │    │ Object Detection│ │
+│  └────────────┘        └──────────────┘    └─────────────────┘ │
+│        │                      │                     │        │
+│        └──────────────────────┴─────────────────────┘        │
+│                               │                              │
+│                               ▼                              │
+│                    Obstacle / Navigation                     │
+│                        Decision Logic                        │
+│                               │                              │
+│                               ▼                              │
+│                           USB Serial                         │
+└───────────────────────────────┬──────────────────────────────┘
+                                │ 115200 baud
+                                ▼
+                       ┌─────────────────┐
+                       │      ESP32      │
+                       │ Motor Controller│
+                       └────────┬────────┘
+                                │ Motor Driver
+                        ┌───────┴───────┐
+                        ▼               ▼
+                   Left Motors     Right Motors
 
 2. Hardware Requirements
-
-Main Computer
-
-Jetson Orin
-
-Ubuntu/Linux compatible with your JetPack installation
-
-Wi-Fi connection
-
-
-Sensors
-
-Intel RealSense camera
-
-RGB + Depth capability
-
-
-Motor Control
-
-ESP32
-
-Motor driver
-
-4-wheel chassis
-
-DC motors
-
-Suitable battery/power system
-
-
-Navigation Marker
-
-Printed ArUco marker
-
-Default marker:
-
-Dictionary: DICT_4X4_50
-
-ID: 0
-
-
-
-Optional Remote Control
-
-Smartphone
-
-Same local network as Jetson Orin
-
-
-
----
-
+ * Main Computer:
+   * Jetson Orin
+   * Ubuntu/Linux compatible with your JetPack installation
+   * Wi-Fi connection
+ * Sensors:
+   * Intel RealSense camera (RGB + Depth capability)
+ * Motor Control:
+   * ESP32
+   * Motor driver
+   * 4-wheel chassis
+   * DC motors
+   * Suitable battery/power system
+ * Navigation Marker:
+   * Printed ArUco marker
+   * Default marker: Dictionary DICT_4X4_50, ID 0
+ * Optional Remote Control:
+   * Smartphone on the same local network as Jetson Orin
 3. Software Architecture
-
-The original repository should remain unchanged.
-
-Additional files can be added beside the original project.
-
-Recommended final structure:
-
+The original repository structure remains intact. Additional files can be added beside the original project.
+Recommended structure:
 ~/rover/
 │
 ├── main_robot_controller.py
@@ -126,1346 +77,368 @@ Recommended final structure:
 ├── requirements.txt
 │
 ├── rover_web_server.py
-│
 ├── models/
-│
 └── venv/
 
-File purposes
-
-main_robot_controller.py
-    Main autonomous rover controller.
-
-esp32_motor_controller.ino
-    ESP32 motor-control firmware.
-
-generate_aruco_marker.py
-    Generates the navigation ArUco marker.
-
-test_webcam_detection.py
-    Camera/detection testing utility.
-
-requirements.txt
-    Python dependencies.
-
-rover_web_server.py
-    Optional local web interface for START/STOP/status control.
-
-models/
-    Optional local AI model files.
-
-venv/
-    Python virtual environment.
-
-
----
-
+File Purposes
+| File / Folder | Description |
+|---|---|
+| main_robot_controller.py | Main autonomous rover controller |
+| esp32_motor_controller.ino | ESP32 motor-control firmware |
+| generate_aruco_marker.py | Generates the navigation ArUco marker |
+| test_webcam_detection.py | Camera/detection testing utility |
+| requirements.txt | Python dependencies |
+| rover_web_server.py | Optional local web interface for START/STOP/status control |
+| models/ | Optional local AI model files |
+| venv/ | Python virtual environment |
 4. Clone the Repository
-
-Open a terminal on the Jetson Orin.
-
+Open a terminal on the Jetson Orin and execute:
 cd ~
-
-Clone the project:
-
-git clone https://github.com/n4b1lAh/obstacle-avoidance-prototype.git rover
-
-Enter the project:
-
+git clone [https://github.com/n4b1lAh/obstacle-avoidance-prototype.git](https://github.com/n4b1lAh/obstacle-avoidance-prototype.git) rover
 cd ~/rover
-
-Check the files:
-
 ls
 
 Expected files include:
-
-main_robot_controller.py
-esp32_motor_controller.ino
-generate_aruco_marker.py
-test_webcam_detection.py
-requirements.txt
-
-
----
-
+ * main_robot_controller.py
+ * esp32_motor_controller.ino
+ * generate_aruco_marker.py
+ * test_webcam_detection.py
+ * requirements.txt
 5. Check Jetson Orin
-
-Check JetPack:
-
+Verify system specifications and JetPack release:
+# Check JetPack
 cat /etc/nv_tegra_release
 
-Check architecture:
-
+# Check architecture (Expected: aarch64)
 uname -m
 
-Expected:
-
-aarch64
-
-Check Python:
-
+# Check Python version
 python3 --version
 
-Check Jetson GPU status:
-
+# Check Jetson GPU status (Press Ctrl+C to exit)
 sudo tegrastats
 
-Press:
-
-Ctrl+C
-
-to exit tegrastats.
-
-
----
-
 6. Install Basic System Packages
-
-Update the system:
-
+Update system dependencies and install required build tools:
 sudo apt update
-
-Install required utilities:
-
 sudo apt install -y \
-    git \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    build-essential \
-    cmake \
-    libopencv-dev \
-    v4l-utils
-
-
----
+  git \
+  python3-pip \
+  python3-venv \
+  python3-dev \
+  build-essential \
+  cmake \
+  libopencv-dev \
+  v4l-utils
 
 7. Create Python Virtual Environment
-
-From the project directory:
-
+Set up and activate a dedicated virtual environment:
 cd ~/rover
-
-Create the environment:
-
 python3 -m venv venv
-
-Activate it:
-
 source venv/bin/activate
 
-Your terminal should now look similar to:
-
-(venv) jetson@orin:~/rover$
-
-Upgrade pip:
-
+Your prompt should now display (venv) jetson@orin:~/rover$. Upgrade core Python build tools:
 pip install --upgrade pip setuptools wheel
 
-
----
-
 8. Install Python Dependencies
-
 Install the repository requirements:
-
 pip install -r requirements.txt
 
-The project requires packages such as:
-
-numpy
-opencv-python
-opencv-contrib-python
-pyrealsense2
-ultralytics
-pyserial
-
-Important — Jetson PyTorch
-
-Do not blindly install a generic desktop PyTorch build.
-
-Jetson Orin uses an NVIDIA JetPack/CUDA environment, so PyTorch should be compatible with the installed JetPack version.
-
-Check:
-
+Required packages include numpy, opencv-python, opencv-contrib-python, pyrealsense2, ultralytics, and pyserial.
+Important — Jetson PyTorch Setup
+Do not blindly install a generic desktop PyTorch build. Jetson Orin uses an NVIDIA JetPack/CUDA environment, so PyTorch must match your specific JetPack release.
+Verify installation and CUDA availability:
 python3 -c "import torch; print(torch.__version__)"
-
-Check CUDA:
-
 python3 -c "import torch; print(torch.cuda.is_available())"
 
-Expected:
-
-True
-
-If PyTorch is missing or CUDA returns False, install the Jetson-compatible PyTorch version for your exact JetPack release before running YOLO.
-
-
----
-
+Expected output: True. If PyTorch is missing or returns False, install the Jetson-compatible PyTorch build for your exact JetPack version before running YOLO.
 9. RealSense Installation
-
-Connect the Intel RealSense camera to a USB 3.x port.
-
-Check USB:
-
+ * Connect the Intel RealSense camera to a USB 3.x port.
+ * Verify USB recognition and Python bindings:
+# Check USB connection
 lsusb
 
-The RealSense device should appear.
-
-Check the Python package:
-
+# Check Python library binding
 python3 -c "import pyrealsense2 as rs; print('RealSense OK')"
 
-Expected:
-
-RealSense OK
-
-Check video devices:
-
+# Check video devices
 ls /dev/video*
 
-
----
-
 10. ESP32 Connection
-
-Connect the ESP32 to the Jetson through USB.
-
-Check:
-
+ * Connect the ESP32 to the Jetson via USB.
+ * Verify device creation:
 ls /dev/ttyUSB*
-
-Also check:
-
 ls /dev/ttyACM*
 
-Typical result:
-
-/dev/ttyUSB0
-
-or:
-
-/dev/ttyACM0
-
-Check recent USB messages:
-
+Typical result: /dev/ttyUSB0 or /dev/ttyACM0. Check system messages using:
 dmesg | tail -30
 
-
----
-
 11. Give Serial-Port Permission
-
-If the user cannot access the ESP32 serial port:
-
+Grant the current user access to the serial interface:
 sudo usermod -aG dialout $USER
 
-Log out and log back in.
-
-Then check:
-
+Log out and log back in, then verify membership:
 groups
 
-dialout should appear.
-
-
----
-
+dialout must be listed in the group output.
 12. ESP32 Firmware
-
-Open:
-
-esp32_motor_controller.ino
-
-Upload it to the ESP32.
-
-The Jetson ↔ ESP32 serial communication uses:
-
-Baud rate: 115200
-
-The controller sends commands such as:
-
-F
-L
-R
-S
-SPIN
-
-The ESP32 controls the motor driver based on these commands.
-
-
----
-
+ * Open esp32_motor_controller.ino using the Arduino IDE or CLI tool.
+ * Flash the code to the ESP32.
+ * Operating parameters:
+   * Baud rate: 115200
+   * Control commands: F (Forward), L (Left), R (Right), S (Stop), SPIN (Rotate)
 13. ESP32 Safety Watchdog
-
-The ESP32 firmware contains a command timeout/watchdog mechanism.
-
-If communication from the Jetson stops for approximately the configured timeout period, the ESP32 should stop the motors.
-
-This is an important safety feature.
-
-Always verify the watchdog before autonomous testing.
-
-
----
-
+The ESP32 firmware includes a command timeout/watchdog mechanism. If communication from the Jetson ceases for longer than the configured timeout window, the ESP32 automatically halts motor activity. Always confirm watchdog functionality prior to untethered autonomous testing.
 14. Test ESP32 Before Autonomous Operation
-
-Do not place the rover on the floor initially.
-
-Lift the rover so the wheels can rotate freely.
-
-Start the controller only after confirming:
-
-Jetson
-   ↓
-USB Serial
-   ↓
-ESP32
-   ↓
-Motor Driver
-   ↓
-Motors
-
-is correctly connected.
-
-
----
-
+ * Lift the rover off the ground so wheels rotate freely.
+ * Confirm the complete communication path:
+   
+ * Perform manual signal generation tests before placing the vehicle on the ground.
 15. ArUco Marker Configuration
-
-The current project does NOT accept every possible ArUco marker.
-
-The default configuration is:
-
-Dictionary:
-DICT_4X4_50
-
-Target ID:
-0
-
-Therefore the navigation marker must be:
-
-DICT_4X4_50
-ID 0
-
-Examples that do NOT match the default configuration:
-
-DICT_4X4_50 / ID 1
-DICT_5X5_50 / ID 0
-DICT_6X6_250 / ID 0
-DICT_7X7_1000 / ID 0
-
-unless the controller is modified accordingly.
-
-
----
-
+The vision system uses standard target markers. Default target parameters:
+ * Dictionary: DICT_4X4_50
+ * Target ID: 0
+Non-matching examples (will be ignored by default): DICT_4X4_50 ID 1, DICT_5X5_50 ID 0, DICT_6X6_250 ID 0.
 16. Generate the ArUco Marker
-
-Run:
-
+Generate and print the navigation target:
 cd ~/rover
 source venv/bin/activate
-
 python3 generate_aruco_marker.py
 
-Generate/print the required marker.
-
-Recommended:
-
-High contrast
-
-Flat surface
-
-No reflections
-
-Sufficient physical size
-
-Clear black border
-
-Mounted vertically
-
-
-
----
-
+Target Placement Standards:
+ * High contrast, non-reflective flat surface
+ * Sufficient physical size with clear black border
+ * Mounted vertically relative to camera field of view
 17. Camera Test
-
-Before autonomous operation, test the camera.
-
-Run:
-
+Run optical diagnostics prior to autonomous execution:
 python3 test_webcam_detection.py
 
-Confirm that:
-
-Camera opens correctly
-
-Image is stable
-
-Detection works
-
-Jetson can access the camera
-
-
-
----
-
+Verify camera stream stability, target recognition, and frame rates.
 18. Main Autonomous Controller
-
-Before using the web server, run the original controller directly.
-
+Run the main execution loop directly:
 cd ~/rover
 source venv/bin/activate
-
 python3 main_robot_controller.py
 
-The basic processing pipeline is:
-
-RealSense RGB
-      │
-      ├──► ArUco Detection
-      │
-      └──► YOLO Object Detection
-
-RealSense Depth
-      │
-      ▼
-Obstacle Detection
-      │
-      ▼
-Navigation Decision
-      │
-      ▼
-F / L / R / S / SPIN
-      │
-      ▼
-ESP32
-      │
-      ▼
-Motors
-
-
----
+Core Processing Pipeline
+RealSense RGB ──► ArUco & YOLO Detection ──┐
+                                            ├──► Obstacle Decision ──► Serial Commands ──► ESP32 ──► Motors
+RealSense Depth ───────────────────────────┘
 
 19. Navigation Logic
-
-The current controller is a reactive navigation system.
-
-The general decision hierarchy is:
-
-┌───────────────┐
-                    │ Target reached│
-                    └───────┬───────┘
-                            │
-                           YES
-                            ▼
-                           SPIN
-
-                            │
-                           NO
-                            ▼
-                  ┌──────────────────┐
-                  │ Center obstructed?│
-                  └────────┬─────────┘
-                           │
-                    YES ───┴─── NO
-                     │            │
-                     ▼            ▼
-             Choose safer     Chase ArUco
-                direction       target
-                     │            │
-                     └─────┬──────┘
-                           ▼
-                         DRIVE
-
-If the target is lost, the controller can stop depending on its current logic.
-
-
----
+The controller operates on a reactive hierarchy:
+┌──────────────────────────┐
+│      Target Reached?     │
+└────────────┬─────────────┘
+             │
+     ┌───────┴───────┐
+    YES              NO
+     │               │
+     ▼               ▼
+  [ SPIN ]  ┌──────────────────┐
+            │ Center Obstructed│
+            └────────┬─────────┘
+                     │
+             ┌───────┴───────┐
+            YES              NO
+             │               │
+             ▼               ▼
+     [ Safer Path ]    [ Target Chase ]
+             │               │
+             └───────┬───────┘
+                     │
+                     ▼
+                  [ DRIVE ]
 
 20. Important Current Limitations
-
-The current repository is a reactive rover controller.
-
-It does not provide a complete:
-
-SLAM system
-Global map
-Path planner
-GPS navigation
-Wheel odometry
-IMU fusion
-Velocity PID controller
-Obstacle memory
-
-The system primarily uses:
-
-RGB
-Depth
-ArUco
-YOLO
-Reactive obstacle avoidance
-
-
----
-
+The controller performs reactive spatial navigation. It does not feature:
+ * SLAM map building / Global path planning
+ * GPS positioning / Odometry integration
+ * IMU sensor fusion / Velocity PID controllers
+ * Spatial obstacle persistence memory
 21. First Autonomous Test
-
-Perform testing in this order.
-
-Test 1 — Camera
-
-Verify RealSense.
-
-python3 test_webcam_detection.py
-
-
----
-
-Test 2 — ArUco
-
-Place:
-
-DICT_4X4_50 / ID 0
-
-in front of the camera.
-
-Verify that the marker is detected.
-
-
----
-
-Test 3 — Object Detection
-
-Verify YOLO detection.
-
-Make sure CUDA is available:
-
-python3 -c "import torch; print(torch.cuda.is_available())"
-
-
----
-
-Test 4 — Serial
-
-Verify Jetson → ESP32 communication.
-
-
----
-
-Test 5 — Motors
-
-Lift the rover.
-
-Verify:
-
-F → Forward
-L → Left
-R → Right
-S → Stop
-SPIN → Rotation
-
-
----
-
-Test 6 — Low-Speed Floor Test
-
-Place the rover on the floor.
-
-Use a large open area.
-
-Keep a physical emergency stop available.
-
-
----
-
-Test 7 — Autonomous Navigation
-
-Place the ArUco target ahead of the rover.
-
-Start the controller:
-
-python3 main_robot_controller.py
-
-Observe:
-
-Target detection
-Depth
-Obstacle avoidance
-Motor commands
-Target approach
-
-
----
-
+Follow this sequential validation workflow:
+ * Camera Test: Run python3 test_webcam_detection.py
+ * ArUco Test: Validate recognition of DICT_4X4_50 / ID 0
+ * Object Detection: Ensure YOLO CUDA acceleration is active
+ * Serial Connection: Verify Jetson \leftrightarrow ESP32 link
+ * Wheel Spin Test: Lift wheels; execute manual F, L, R, S, SPIN commands
+ * Floor Clearance Test: Clear a wide area; ensure emergency power cutoff accessibility
+ * Target Navigation Test: Place target in line-of-sight and execute python3 main_robot_controller.py
 22. Stop the Controller
-
-Normally press:
-
-Ctrl+C
-
-The controller should stop and execute its cleanup procedure.
-
-Confirm that:
-
-Motors → STOP
-Camera → Released
-OpenCV windows → Closed
-
-
----
-
+To gracefully terminate execution:
+ * Issue a terminal interrupt via Ctrl+C.
+ * Ensure the cleanup routines execute:
+   * ESP32 receives explicit S (Stop) signal
+   * Camera feed and OpenCV handles release cleanly
 23. Optional Phone Web Dashboard
-
-The web dashboard is an additional independent component.
-
-It should NOT replace:
-
-main_robot_controller.py
-
-Architecture:
-
-Phone
-  │
-  │ Wi-Fi
-  ▼
-Jetson Orin
-  │
-  ▼
-rover_web_server.py
-  │
-  ├── START
-  ├── STOP
-  ├── STATUS
-  └── LOG / TELEMETRY
-       │
-       ▼
-main_robot_controller.py
-
-
----
+The web dashboard functions as a supervisor without modifying core logic.
+Phone (Browser) ──► Wi-Fi ──► Jetson Orin (rover_web_server.py) ──► main_robot_controller.py
 
 24. Install the Web Server
-
-Place:
-
-rover_web_server.py
-
-inside:
-
+Place rover_web_server.py in the root repository folder:
 ~/rover/
-
-The final structure becomes:
-
-~/rover/
-│
 ├── main_robot_controller.py
+├── rover_web_server.py
 ├── esp32_motor_controller.ino
 ├── generate_aruco_marker.py
 ├── test_webcam_detection.py
-├── requirements.txt
-├── rover_web_server.py
-│
-├── models/
-└── venv/
-
-
----
+└── requirements.txt
 
 25. Start the Web Server
-
-Activate the environment:
-
+Execute the server inside the virtual environment:
 cd ~/rover
 source venv/bin/activate
-
-Start:
-
 python3 rover_web_server.py
-
-
----
 
 26. Find Jetson IP Address
-
-Run:
-
+Obtain local network credentials:
 hostname -I
 
-Example:
-
-192.168.1.120
-
-
----
-
+Example response: 192.168.1.120
 27. Connect From Phone
-
-Connect the phone to the same Wi-Fi/LAN as the Jetson.
-
-Open a browser:
-
-http://192.168.1.120:8080
-
-Replace:
-
-192.168.1.120
-
-with the actual Jetson IP.
-
-
----
-
+ * Connect smartphone to the same local Wi-Fi subnet as the Jetson Orin.
+ * Open a web browser and navigate to:
+   http://<JETSON_IP>:8080 (e.g., http://192.168.1.120:8080).
 28. Web Dashboard Operation
-
-The dashboard should provide controls such as:
-
+Interface Layout:
 ┌─────────────────────────────┐
-│       ROVER CONTROL         │
+│        ROVER CONTROL        │
 ├─────────────────────────────┤
-│                             │
 │ Status: STOPPED             │
 │                             │
-│ [ START ]    [ STOP ]       │
+│  [ START ]    [ STOP ]      │
 │                             │
 │ Controller: OFF             │
-│ PID: ---                    │
-│                             │
-│ Detection: ---              │
-│ Next Step: ---              │
-│                             │
-│ Live Log                    │
-│ -------------------------   │
-│                             │
+│ Live Log Feed:              │
+│ --------------------------- │
+│ > System initialized...     │
 └─────────────────────────────┘
 
-
----
-
 29. Important Telemetry Limitation
-
-If the original:
-
-main_robot_controller.py
-
-does not print a particular internal value, an external web server cannot directly know that Python variable without modifying/instrumenting the controller.
-
-For example:
-
-ArUco ID
-ArUco distance
-Left depth
-Center depth
-Right depth
-YOLO detections
-Navigation decision
-FPS
-
-can only be displayed externally if:
-
-1. The controller already prints them, or
-
-
-2. A telemetry interface is added, or
-
-
-3. A separate wrapper parses the controller output.
-
-
-
-The web server should not pretend to have access to internal variables that the original process does not expose.
-
-
----
-
+An external process cannot inspect internal Python state variables unless explicitly printed to stdout or exported through an IPC mechanism (IPC/Sockets). Information like FPS, Depth matrix values, and YOLO bounding boxes must be written to standard stdout streams to display on external web dashboards.
 30. Recommended Zero-Modification Approach
+Capture subprocess standard output streams without changing target base modules:
+main_robot_controller.py ──(stdout)──► rover_web_server.py ──► Phone Dashboard
 
-To keep the repository architecture unchanged:
-
-main_robot_controller.py
-        │
-        │ stdout
-        ▼
-rover_web_server.py
-        │
-        ▼
-Phone Dashboard
-
-The web server can capture and display controller output.
-
-This allows:
-
-START
-STOP
-PROCESS STATUS
-PID
-RUNTIME
-LOG
-AVAILABLE TELEMETRY
-
-without modifying the original controller.
-
-
----
-
+Provides non-invasive runtime logging, status tracking, process execution, and graceful shutdown monitoring.
 31. Safe STOP Procedure
-
-The web server should preferably stop the controller gracefully.
-
-Recommended sequence:
-
-Phone STOP
-     │
-     ▼
-Send SIGINT
-     │
-     ▼
-main_robot_controller.py
-     │
-     ▼
-cleanup()
-     │
-     ▼
-Send STOP to ESP32
-     │
-     ▼
-Motors stop
-
-If the process does not stop:
-
-SIGTERM
-     ↓
-KILL fallback
-
-should be used only as a final fallback.
-
-
----
-
+Standard termination pipeline:
+If the process fails to terminate within timeout bounds, fallback strategies issue SIGTERM followed by SIGKILL.
 32. LAN Security
-
-The web server controls a physical rover.
-
-Therefore:
-
-Do not expose port 8080 directly to the public Internet.
-
-Recommended:
-
-Phone
-  │
-  │ Trusted Wi-Fi
-  ▼
-Jetson
-
-Avoid:
-
-Internet
-   │
-   ▼
-Jetson:8080
-
-For a permanent deployment, add authentication or use a secure VPN/SSH tunnel.
-
-
----
-
+ * Do not expose port 8080 directly to public routing tables.
+ * Operate within trusted local networks, isolated access points, or encrypted VPN tunnels (e.g., Tailscale, WireGuard).
 33. Automatic Startup — Optional
-
-After the entire system has been tested manually, the web server can be configured as a systemd service.
-
-Desired boot sequence:
-
-Jetson boots
-     │
-     ▼
-Network available
-     │
-     ▼
-rover_web_server.py starts
-     │
-     ▼
-Phone opens dashboard
-     │
-     ▼
-START
-     │
-     ▼
-main_robot_controller.py
-
-Do NOT enable automatic autonomous motor movement at boot.
-
-The rover should remain stopped until explicitly started.
-
-
----
-
+System boot sequence when using systemd services:
+> Safety Warning: Do not configure autonomous driving logic to automatically start executing motor commands on system boot.
+> 
 34. Recommended systemd Services
-
-Recommended final arrangement:
-
+Maintain separate service definitions to keep web serving decoupled from vehicle execution:
 systemd
-   │
-   └── rover-web.service
-            │
-            ▼
-      rover_web_server.py
-            │
-            └── START/STOP
-                    │
-                    ▼
-          main_robot_controller.py
-
-The controller itself should not automatically drive the rover after Jetson boot.
-
-
----
+ └── rover-web.service
+      └── launches: rover_web_server.py
+           └── manually triggers: main_robot_controller.py
 
 35. Useful Commands
+# Activate environment
+cd ~/rover && source venv/bin/activate
 
-Activate environment
-
-cd ~/rover
-source venv/bin/activate
-
-Run controller
-
+# Execute core controller
 python3 main_robot_controller.py
 
-Run web server
-
+# Execute web supervisor
 python3 rover_web_server.py
 
-Check Jetson IP
+# Diagnostic checks
+hostname -I                                                      # IP Address
+ls /dev/ttyUSB* /dev/ttyACM*                                     # Serial Interfaces
+lsusb                                                            # USB Devices
+ls /dev/video*                                                   # Video Devices
+sudo tegrastats                                                  # System Resource Utilization
 
-hostname -I
-
-Check serial ports
-
-ls /dev/ttyUSB*
-ls /dev/ttyACM*
-
-Check USB devices
-
-lsusb
-
-Check camera devices
-
-ls /dev/video*
-
-Check Jetson status
-
-sudo tegrastats
-
-Check Python
-
-python3 --version
-
-Check CUDA
-
-python3 -c "import torch; print(torch.cuda.is_available())"
-
-Check OpenCV
-
-python3 -c "import cv2; print(cv2.__version__)"
-
-Check RealSense
-
-python3 -c "import pyrealsense2 as rs; print('RealSense OK')"
-
-Check Ultralytics
-
-python3 -c "from ultralytics import YOLO; print('Ultralytics OK')"
-
-
----
+# Environment validation
+python3 -c "import torch; print(torch.cuda.is_available())"      # PyTorch CUDA
+python3 -c "import cv2; print(cv2.__version__)"                  # OpenCV
+python3 -c "import pyrealsense2 as rs; print('RealSense OK')"    # RealSense SDK
+python3 -c "from ultralytics import YOLO; print('YOLO OK')"      # Ultralytics Framework
 
 36. Troubleshooting
-
-Jetson cannot see ESP32
-
-Check:
-
-ls /dev/ttyUSB*
-ls /dev/ttyACM*
-
-Then:
-
-dmesg | tail -30
-
-Check USB cable.
-
-Some USB cables are power-only.
-
-
----
-
-Permission denied on serial
-
-Run:
-
-sudo usermod -aG dialout $USER
-
-Log out and log back in.
-
-
----
-
-RealSense not detected
-
-Check:
-
-lsusb
-
-Try another USB 3.x port.
-
-Check:
-
-python3 -c "import pyrealsense2 as rs; print('OK')"
-
-
----
-
-CUDA is False
-
-Run:
-
-python3 -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
-
-Check:
-
-cat /etc/nv_tegra_release
-
-Install a PyTorch build compatible with the installed JetPack version.
-
-Do not randomly downgrade/upgrade CUDA libraries.
-
-
----
-
-YOLO is very slow
-
-Check:
-
-sudo tegrastats
-
-Look at:
-
-GPU
-CPU
-RAM
-Temperature
-Power
-
-Possible causes:
-
-Wrong PyTorch build
-
-CPU inference instead of GPU
-
-High image resolution
-
-Large YOLO model
-
-Thermal throttling
-
-Insufficient power
-
-
-
----
-
-ArUco marker not detected
-
-Confirm:
-
-Dictionary = DICT_4X4_50
-ID = 0
-
-Also check:
-
-Good lighting
-
-Marker is flat
-
-Marker is not blurred
-
-Entire marker is visible
-
-Adequate camera distance
-
-Correct print quality
-
-
-
----
-
-Rover keeps stopping
-
-Check:
-
-ArUco detection
-Depth detection
-ESP32 serial connection
-ESP32 watchdog
-Motor driver
-Battery
-
-Check controller logs.
-
-
----
-
-Rover turns/oscillates
-
-The current navigation algorithm is reactive.
-
-Possible causes:
-
-Target near image center boundary
-
-Depth measurements changing rapidly
-
-Three-sector depth representation
-
-Target detection jitter
-
-No velocity PID
-
-No obstacle memory
-
-No odometry
-
-
-This is a limitation of the current architecture rather than necessarily a hardware failure.
-
-
----
-
+ * Jetson cannot see ESP32: Check ls /dev/ttyUSB* and dmesg | tail -30. Verify cable supports data transmission, not just power delivery.
+ * Permission denied on serial port: Ensure user belongs to the dialout group (sudo usermod -aG dialout $USER). Re-log required.
+ * RealSense not detected: Verify USB connection status using lsusb. Ensure attachment to a USB 3.x port.
+ * CUDA available returns False: Validate JetPack compatibility and reinstall PyTorch built for NVIDIA L4T environments.
+ * YOLO execution sluggish: Run sudo tegrastats to observe GPU allocation. High latency usually indicates fallback to CPU execution or severe thermal throttling.
+ * ArUco marker ignored: Verify marker uses dictionary DICT_4X4_50 and ID 0. Ensure minimal glare and adequate lighting.
+ * Vehicle oscillates during approach: Reactive systems suffer jitter near decision boundaries. Fine-tune camera placement or adjust sector threshold parameters.
 37. Pre-Deployment Checklist
-
-Before operating the rover:
-
-[ ] Jetson Orin boots correctly
-[ ] JetPack verified
-[ ] Python installed
-[ ] Virtual environment created
-[ ] Dependencies installed
-[ ] Jetson CUDA verified
-[ ] PyTorch CUDA verified
-[ ] RealSense detected
-[ ] ESP32 detected
-[ ] Serial permissions configured
-[ ] ESP32 firmware uploaded
-[ ] Motor driver tested
-[ ] ESP32 watchdog tested
-[ ] ArUco marker generated
-[ ] DICT_4X4_50 confirmed
-[ ] ArUco ID 0 confirmed
-[ ] YOLO tested
-[ ] Main controller tested
-[ ] Motors tested with wheels lifted
-[ ] Emergency stop available
-[ ] Low-speed floor test completed
-[ ] Web server tested
-[ ] Phone can connect
-[ ] START tested
-[ ] STOP tested
-
-
----
-
+ * [ ] Jetson Orin boots cleanly
+ * [ ] JetPack version verified
+ * [ ] Python environment configured
+ * [ ] Requirements installed
+ * [ ] CUDA hardware acceleration verified in PyTorch
+ * [ ] Intel RealSense camera operational
+ * [ ] ESP32 recognized on serial bus
+ * [ ] dialout group permissions set
+ * [ ] ESP32 firmware uploaded
+ * [ ] Safety watchdog tested
+ * [ ] Correct ArUco marker printed (DICT_4X4_50 / ID 0)
+ * [ ] Camera and YOLO inference tested
+ * [ ] Elevated wheel spin tests completed
+ * [ ] Physical emergency stop confirmed operational
+ * [ ] Floor test area cleared
+ * [ ] Web server functional (if deployed)
 38. Recommended Operating Procedure
-
-Every normal operation should follow:
-
-1. Power ON rover
-       ↓
-2. Power ON Jetson Orin
-       ↓
-3. Wait for Linux/network
-       ↓
-4. Verify ESP32
-       ↓
-5. Verify RealSense
-       ↓
-6. Start web server
-       ↓
-7. Connect phone
-       ↓
-8. Confirm rover is physically safe
-       ↓
-9. Place ArUco target
-       ↓
-10. Press START
-       ↓
-11. Monitor dashboard
-       ↓
-12. Press STOP when required
-       ↓
-13. Verify motors stopped
-       ↓
-14. Power down rover
-
-
----
+1. Power ON vehicle & Jetson Orin
+   └─► 2. Verify hardware interfaces (RealSense / ESP32)
+        └─► 3. Launch Web Server or Terminal Session
+             └─► 4. Establish smartphone client connection
+                  └─► 5. Position ArUco target
+                       └─► 6. Issue START command
+                            └─► 7. Monitor performance
+                                 └─► 8. Issue STOP command
+                                      └─► 9. Power down
 
 39. Emergency Procedure
-
-If the rover behaves unexpectedly:
-
-First priority
-
-Use the physical power/emergency switch.
-
-POWER OFF
-
-Do not depend only on the web interface.
-
-Then
-
-Stop the controller:
-
-Ctrl+C
-
-or use the web dashboard:
-
-STOP
-
-Check:
-
-ESP32
-Motor driver
-Battery
-Serial connection
-Camera
-Navigation detection
-
-before restarting.
-
-
----
-
+In case of abnormal physical behavior:
+ * PRIMARY: Actuate the physical battery/power cutoff switch immediately.
+ * SECONDARY: Issue terminal interjection (Ctrl+C) or tap STOP on the web dashboard.
+ * Perform diagnostics on motor drivers and serial logs prior to restarting.
 40. Final System
-
-The intended final system is:
-
-PHONE
-                           │
-                        Wi-Fi
-                           │
-                           ▼
-                 ┌──────────────────┐
-                 │     Jetson Orin  │
-                 │                  │
-                 │ Web Server       │
-                 │ START / STOP     │
-                 │ STATUS / LOG     │
-                 └────────┬─────────┘
-                          │
-                          ▼
-              main_robot_controller.py
-                          │
-             ┌────────────┼────────────┐
-             │            │            │
-             ▼            ▼            ▼
-        RealSense       ArUco        YOLO
-        RGB + Depth     Target       Objects
-             │            │            │
-             └────────────┼────────────┘
-                          ▼
-                  Navigation Logic
-                          │
-                          ▼
-                   Serial 115200
-                          │
-                          ▼
-                       ESP32
-                          │
-                     Motor Driver
-                          │
-                          ▼
-                    4-Wheel Rover
-
-
----
+PHONE (Wi-Fi Dashboard)
+        │
+        ▼
+   JETSON ORIN
+ ┌──────────────────────────────────────┐
+ │  rover_web_server.py                 │
+ │     └─► main_robot_controller.py     │
+ │            ├─► RealSense RGB/Depth   │
+ │            ├─► Vision (ArUco/YOLO)   │
+ │            └─► Navigation Logic      │
+ └──────────────────┬───────────────────┘
+                    │ Serial 115200
+                    ▼
+                  ESP32 ──► Motor Driver ──► 4-Wheel Rover
 
 41. Important Design Principle
-
-The deployment should preserve the original repository:
-
-main_robot_controller.py
-
-as the core autonomous controller.
-
-The web interface is an external supervisory layer:
-
-Phone
-  ↓
-Web Server
-  ↓
-Controller
-  ↓
-ESP32
-  ↓
-Motors
-
-This makes the system easier to debug, update, and recover if the web interface fails.
-
-The rover's physical safety should never depend solely on the phone, Wi-Fi, or web server.
-
-
----
-
+Keep core driving routines modular:
+This structure ensures physical debugging capability directly on the robot even if network connectivity or web serving breaks down.
 42. Quick Start
-
-After everything has been installed and tested:
-
+# Start Web Server Workflow
 cd ~/rover
 source venv/bin/activate
 python3 rover_web_server.py
 
-Find the Jetson IP:
+# Open browser at http://<JETSON_IP>:8080 and click START
 
-hostname -I
-
-Open from the phone:
-
-http://JETSON_IP:8080
-
-Then:
-
-START
-  ↓
-Autonomous rover begins
-  ↓
-Monitor status/log
-  ↓
-STOP
-
-For direct operation without the web server:
-
+# Direct Command Line Workflow (Without Web Interface)
 cd ~/rover
 source venv/bin/activate
 python3 main_robot_controller.py
 
+Project Metadata Summary:
+ * Repository: obstacle-avoidance-prototype
+ * Target Hardware: Jetson Orin & ESP32 Motor Controller
+ * Default Target Marker: DICT_4X4_50 (ID: 0)
+ * Baud Rate: 115200
+ * Default Web Server Port: 8080
 
----
-
-END
-
-Project: https://github.com/n4b1lAh/obstacle-avoidance-prototype
-
-Platform: Jetson Orin
-
-Vehicle: 4-Wheel Autonomous Rover
-
-Default ArUco: DICT_4X4_50 / ID 0
-
-ESP32 Serial: 115200 baud
-
-Web Dashboard: Port 8080
